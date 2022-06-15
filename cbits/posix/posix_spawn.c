@@ -4,6 +4,7 @@
 #include <unistd.h>
 #include <errno.h>
 #include <signal.h>
+#include <stdio.h>
 
 #if !defined(USE_POSIX_SPAWN)
 ProcHandle
@@ -199,8 +200,17 @@ do_spawn_posix (char *const args[],
         goto fail;
     }
 
+    for (int i=0; args[i] != NULL; i++) {
+      printf("args %s \n", args[i]);
+    }
+    char **penv = environment ? environment : environ;
+    for (int i=0; penv[i] != NULL; i++) {
+      printf("envi %s \n", penv[i]);
+    }
+
     r = posix_spawnp(&pid, args[0], &fa, &sa, args, environment ? environment : environ);
     if (r != 0) {
+        printf("posix_spawnp_failed %d", r);
         errno = r; // posix_spawn doesn't necessarily set errno; see #227.
         *failed_doing = "posix_spawnp";
         goto fail;
